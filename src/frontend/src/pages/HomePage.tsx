@@ -4,6 +4,7 @@ import { useNavigate } from "@tanstack/react-router";
 import {
   ChevronRight,
   Layers,
+  Play,
   Plus,
   Share2,
   Sparkles,
@@ -197,17 +198,37 @@ export function HomePage() {
                   </div>
                 </div>
 
-                <Button
-                  size="sm"
-                  className="w-full rounded-xl h-9 text-sm gap-1 group-hover:shadow-md transition-shadow"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    navigate({ to: "/app/$appId", params: { appId: app.id } });
-                  }}
-                >
-                  View App
-                  <ChevronRight className="w-3.5 h-3.5" />
-                </Button>
+                <div className="flex gap-2">
+                  <Button
+                    size="sm"
+                    className="flex-1 rounded-xl h-9 text-sm gap-1 group-hover:shadow-md transition-shadow"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate({
+                        to: "/app/$appId",
+                        params: { appId: app.id },
+                      });
+                    }}
+                  >
+                    View App
+                    <ChevronRight className="w-3.5 h-3.5" />
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="rounded-xl h-9 px-3 text-sm gap-1 text-primary border-primary/20 bg-primary/5 hover:bg-primary/10"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate({
+                        to: "/play/$appId",
+                        params: { appId: app.id },
+                      });
+                    }}
+                  >
+                    <Play className="w-3.5 h-3.5" />
+                    Play
+                  </Button>
+                </div>
               </motion.div>
             ))}
           </div>

@@ -11,6 +11,7 @@ import { Layout } from "./components/Layout";
 import { AppDetailPage } from "./pages/AppDetailPage";
 import { BuilderPage } from "./pages/BuilderPage";
 import { HomePage } from "./pages/HomePage";
+import { PlayPage } from "./pages/PlayPage";
 
 // ── Routes ────────────────────────────────────────────────────────────────────
 
@@ -49,11 +50,18 @@ const appDetailRoute = createRoute({
   component: AppDetailPage,
 });
 
+const playRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/play/$appId",
+  component: PlayPage,
+});
+
 const routeTree = rootRoute.addChildren([
   homeRoute,
   builderNewRoute,
   builderEditRoute,
   appDetailRoute,
+  playRoute,
 ]);
 
 const router = createRouter({ routeTree });

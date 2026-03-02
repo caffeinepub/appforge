@@ -1,41 +1,51 @@
 # AppForge
 
 ## Current State
-New project. No existing backend or frontend code.
+
+- Full-stack app builder with Motoko backend and React frontend
+- Two-step builder flow: (1) App Details (name, description, icon, screenshots), (2) Screen Designer
+- App Details step requires users to manually upload screenshots
+- Screen Designer lets users add/arrange UI components (button, text, input, list) across multiple screens
+- Published apps appear in an App Store gallery (HomePage)
+- Apps can be previewed and played (PlayPage, AppDetailPage)
+- Backend stores apps with `id, name, description, screens, icon, screenshots, isPublished`
 
 ## Requested Changes (Diff)
 
 ### Add
-- A public no-code app builder where anyone (no login required) can create, design, edit, and delete mobile app projects
-- App metadata: name, icon (uploaded image), description, screenshots (uploaded images)
-- Multi-screen designer: users can add multiple screens to their app, each screen containing drag-and-drop UI components (button, text, form input, list)
-- App store listing page: a public gallery of all published apps displayed in an Apple-style grid with app icon, name, and description
-- App detail page: shows full app info (icon, name, description, screenshots, and a live preview of the designed screens)
-- Edit mode: users can return to an app and modify its details, screens, and components
-- Delete: users can remove their app from the listing
-- Screen navigation preview: the app preview shows the screens with simulated navigation between them
+- **AI Chat Assistant** panel on the App Details step (Step 1): a floating chat box where users can describe their app in natural language
+- **AI-generated app details**: when user sends a message, the AI (simulated client-side) parses it and auto-fills name, description, and generates placeholder screens for the designer step
+- **AI-generated screens**: when the AI processes the description, it creates initial screens with appropriate components (buttons, lists, inputs, text) based on keywords in the description
+- Optional screenshots: screenshots section stays but is no longer required -- remove the screenshot requirement from the validation logic
 
 ### Modify
-- None (new project)
+- **DetailsStep validation**: screenshots are now optional (remove any "must have screenshot" requirement -- currently there is none but make it clear in UI that they're optional)
+- **DetailsStep UI**: add an "Ask AI" chat panel alongside the form. When the user types a description and sends it, the AI fills in the name, description fields and optionally suggests screens. The chat should feel conversational with a simple message history.
+- **DetailsStep screenshot label**: change "Screenshots" label to "Screenshots (optional)" to make it clear they're not required
+- **Builder flow**: after AI fills details, the user can proceed to the Screen Designer where AI-generated screens are already populated
 
 ### Remove
-- None (new project)
+- Nothing removed -- manual entry and screenshot upload remain available alongside AI
 
 ## Implementation Plan
 
-### Backend (Motoko)
-1. Data types: App (id, name, description, iconUrl, screenshotUrls, screens, createdAt, updatedAt), Screen (id, name, components), Component (id, type [button|text|input|list], label, placeholder, items)
-2. CRUD for apps: createApp, getApp, listApps, updateApp, deleteApp
-3. Store apps in a stable HashMap keyed by UUID
-4. Return app list sorted by newest first
+1. **Add AI chat component to DetailsStep** (`BuilderPage.tsx`)
+   - Add a collapsible "Ask AI" section/panel below or alongside the form
+   - Chat input + message history (user messages + AI responses)
+   - AI response is generated client-side using keyword parsing (no external API -- simulate AI by parsing description keywords)
+   - When AI responds, it calls setter functions to auto-fill `name`, `description` fields
+   - AI also returns suggested screens (array of `{title, components[]}`)
+   - Store AI-suggested screens in component state to be passed to DesignerStep
 
-### Frontend
-1. Home / App Store page: grid of app cards (icon, name, short description), "Create App" button
-2. App Builder page (create/edit):
-   - Step 1: App Details form (name, description, icon upload, screenshot uploads)
-   - Step 2: Screen Designer with left panel (screen list, add screen), center canvas (component list per screen), right panel (add component: button, text, input, list)
-   - Drag-and-drop reordering of components within a screen
-   - Save/Publish button
-3. App Detail page: full listing view (icon, name, description, screenshots carousel, live screen preview with navigation)
-4. Delete confirmation dialog
-5. Clean, minimal Apple-style UI
+2. **Pass AI-generated screens to DesignerStep**
+   - Add `initialScreens?: Array<{title: string, components: AppComponent[]}>` prop to DesignerStep
+   - On mount, if `initialScreens` is provided and app has no screens yet, create them via `addScreen` mutations
+
+3. **Make screenshots clearly optional**
+   - Update label to "Screenshots (optional)"
+   - No validation change needed (already optional), just clarify in UI
+
+4. **AI parsing logic** (client-side, no external API)
+   - Parse user input for keywords to suggest app name, description, and screen structure
+   - Example: "todo app" -> name: "TaskMaster", description: "...", screens: [Home with list+button, Add Task with input+button]
+   - Keep it simple and fast -- pure JS string parsing with template-based responses

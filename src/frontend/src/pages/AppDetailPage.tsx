@@ -18,6 +18,7 @@ import {
   Edit3,
   Loader2,
   Monitor,
+  Play,
   Share2,
   Trash2,
 } from "lucide-react";
@@ -295,6 +296,16 @@ export function AppDetailPage() {
               >
                 <Edit3 className="w-4 h-4" />
                 Edit App
+              </Button>
+              <Button
+                variant="outline"
+                className="gap-2 rounded-xl h-10 px-5 bg-primary/5 border-primary/20 text-primary hover:bg-primary/10"
+                onClick={() =>
+                  navigate({ to: "/play/$appId", params: { appId: app.id } })
+                }
+              >
+                <Play className="w-4 h-4" />
+                Play
               </Button>
               <Button
                 variant="outline"

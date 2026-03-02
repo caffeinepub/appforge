@@ -11,13 +11,14 @@ import {
   Check,
   ChevronLeft,
   ChevronRight,
-  Eye,
   GripVertical,
   ImagePlus,
   List,
   Loader2,
   Monitor,
   Plus,
+  Send,
+  Sparkles,
   Square,
   Trash2,
   Type,
@@ -27,7 +28,6 @@ import {
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import { ExternalBlob } from "../backend";
 import { AppIcon } from "../components/AppIcon";
 import {
   fileToExternalBlob,
@@ -38,17 +38,244 @@ import {
   useEditScreen,
   useGetApp,
   usePublishApp,
-  useUnpublishApp,
   useUploadIcon,
 } from "../hooks/useQueries";
 import type { AppComponent } from "../types/builder";
 import { parseScreenContent, stringifyScreenContent } from "../types/builder";
+import type { SuggestedScreen } from "../utils/aiGenerator";
+import { generateAppFromDescription } from "../utils/aiGenerator";
+
+// ── AI Chat Types ─────────────────────────────────────────────────────────────
+
+interface ChatMessage {
+  id: string;
+  role: "user" | "ai";
+  text: string;
+  timestamp: number;
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
+function renderBoldText(text: string) {
+  const parts = text.split(/(\*\*[^*]+\*\*)/);
+  return parts.map((part) => {
+    if (part.startsWith("**") && part.endsWith("**")) {
+      const content = part.slice(2, -2);
+      return <strong key={content}>{content}</strong>;
+    }
+    return part;
+  });
+}
+
+// ── AI Chat Panel ─────────────────────────────────────────────────────────────
+
+interface AiChatPanelProps {
+  onApply: (
+    name: string,
+    description: string,
+    screens: SuggestedScreen[],
+  ) => void;
+}
+
+function AiChatPanel({ onApply }: AiChatPanelProps) {
+  const [messages, setMessages] = useState<ChatMessage[]>([
+    {
+      id: "welcome",
+      role: "ai",
+      text: "Hi! Describe your app idea and I'll set up the name, description, and screens for you automatically ✨",
+      timestamp: Date.now(),
+    },
+  ]);
+  const [input, setInput] = useState("");
+  const [isThinking, setIsThinking] = useState(false);
+  const [appliedOnce, setAppliedOnce] = useState(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // Auto-scroll to bottom when messages change
+  // biome-ignore lint/correctness/useExhaustiveDependencies: scrollRef is stable, messages/isThinking trigger scroll
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [messages, isThinking]);
+
+  const handleSend = async () => {
+    const trimmed = input.trim();
+    if (!trimmed || isThinking) return;
+
+    const userMsg: ChatMessage = {
+      id: crypto.randomUUID(),
+      role: "user",
+      text: trimmed,
+      timestamp: Date.now(),
+    };
+
+    setMessages((prev) => [...prev, userMsg]);
+    setInput("");
+    setIsThinking(true);
+
+    // Simulate AI processing delay
+    await new Promise((resolve) => setTimeout(resolve, 600));
+
+    const result = generateAppFromDescription(trimmed);
+
+    const aiMsg: ChatMessage = {
+      id: crypto.randomUUID(),
+      role: "ai",
+      text: result.chatResponse,
+      timestamp: Date.now(),
+    };
+
+    setMessages((prev) => [...prev, aiMsg]);
+    setIsThinking(false);
+
+    // Auto-apply to form
+    onApply(result.name, result.description, result.suggestedScreens);
+    setAppliedOnce(true);
+
+    // Focus input after response
+    setTimeout(() => inputRef.current?.focus(), 50);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
+    }
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+      className="rounded-2xl border border-primary/20 bg-gradient-to-b from-primary/5 to-transparent overflow-hidden"
+    >
+      {/* Header */}
+      <div className="flex items-center gap-2.5 px-4 py-3 border-b border-primary/15 bg-primary/5">
+        <div className="w-7 h-7 rounded-xl bg-primary flex items-center justify-center flex-shrink-0">
+          <Sparkles className="w-3.5 h-3.5 text-primary-foreground" />
+        </div>
+        <div>
+          <p className="text-sm font-semibold text-foreground leading-none">
+            AI App Builder
+          </p>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            Describe your idea, I'll set it up
+          </p>
+        </div>
+        {appliedOnce && (
+          <motion.div
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="ml-auto flex items-center gap-1.5 bg-success/15 text-success px-2.5 py-1 rounded-full"
+          >
+            <Check className="w-3 h-3" />
+            <span className="text-xs font-medium">Applied</span>
+          </motion.div>
+        )}
+      </div>
+
+      {/* Messages */}
+      <div ref={scrollRef} className="h-48 overflow-y-auto px-4 py-3 space-y-3">
+        <AnimatePresence initial={false}>
+          {messages.map((msg) => (
+            <motion.div
+              key={msg.id}
+              initial={{ opacity: 0, y: 8, scale: 0.97 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+              className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
+            >
+              {msg.role === "ai" && (
+                <div className="w-5 h-5 rounded-full bg-primary flex items-center justify-center flex-shrink-0 mr-2 mt-0.5">
+                  <Sparkles className="w-2.5 h-2.5 text-primary-foreground" />
+                </div>
+              )}
+              <div
+                className={`max-w-[80%] px-3 py-2 rounded-2xl text-sm leading-relaxed ${
+                  msg.role === "user"
+                    ? "bg-primary text-primary-foreground rounded-br-sm"
+                    : "bg-card border border-border text-foreground rounded-bl-sm"
+                }`}
+              >
+                {/* Render bold text with ** markers */}
+                {renderBoldText(msg.text)}
+              </div>
+            </motion.div>
+          ))}
+
+          {isThinking && (
+            <motion.div
+              key="thinking"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 4 }}
+              className="flex justify-start"
+            >
+              <div className="w-5 h-5 rounded-full bg-primary flex items-center justify-center flex-shrink-0 mr-2 mt-0.5">
+                <Sparkles className="w-2.5 h-2.5 text-primary-foreground" />
+              </div>
+              <div className="bg-card border border-border px-3 py-2.5 rounded-2xl rounded-bl-sm">
+                <div className="flex gap-1">
+                  {[0, 1, 2].map((i) => (
+                    <motion.div
+                      key={i}
+                      className="w-1.5 h-1.5 rounded-full bg-muted-foreground/50"
+                      animate={{ opacity: [0.3, 1, 0.3] }}
+                      transition={{
+                        duration: 1,
+                        repeat: Number.POSITIVE_INFINITY,
+                        delay: i * 0.2,
+                      }}
+                    />
+                  ))}
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+
+      {/* Input */}
+      <div className="px-3 pb-3 pt-2 border-t border-primary/10">
+        <div className="flex gap-2">
+          <Input
+            ref={inputRef}
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder="e.g. a todo app for managing daily tasks..."
+            className="h-9 rounded-xl text-sm flex-1 bg-background/80"
+            disabled={isThinking}
+          />
+          <Button
+            size="sm"
+            className="h-9 w-9 px-0 rounded-xl flex-shrink-0"
+            onClick={handleSend}
+            disabled={!input.trim() || isThinking}
+          >
+            {isThinking ? (
+              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+            ) : (
+              <Send className="w-3.5 h-3.5" />
+            )}
+          </Button>
+        </div>
+        <p className="text-xs text-muted-foreground/60 mt-1.5 pl-1">
+          Press Enter to send · AI fills the form below automatically
+        </p>
+      </div>
+    </motion.div>
+  );
+}
 
 // ── Step 1: App Details ────────────────────────────────────────────────────────
 
 interface DetailsStepProps {
   appId: string | null;
-  onNext: (id: string) => void;
+  onNext: (id: string, screens: SuggestedScreen[]) => void;
 }
 
 function DetailsStep({ appId, onNext }: DetailsStepProps) {
@@ -69,6 +296,8 @@ function DetailsStep({ appId, onNext }: DetailsStepProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [iconUploading, setIconUploading] = useState(false);
   const [screenshotUploading, setScreenshotUploading] = useState(false);
+  const [pendingScreens, setPendingScreens] = useState<SuggestedScreen[]>([]);
+  const [aiApplied, setAiApplied] = useState(false);
 
   const iconInputRef = useRef<HTMLInputElement>(null);
   const screenshotInputRef = useRef<HTMLInputElement>(null);
@@ -88,6 +317,19 @@ function DetailsStep({ appId, onNext }: DetailsStepProps) {
       }
     }
   }, [existingApp]);
+
+  const handleAiApply = (
+    aiName: string,
+    aiDescription: string,
+    screens: SuggestedScreen[],
+  ) => {
+    setName(aiName);
+    setDescription(aiDescription);
+    setPendingScreens(screens);
+    setAiApplied(true);
+    // Brief flash to indicate fields were filled
+    setTimeout(() => setAiApplied(false), 2500);
+  };
 
   const handleIconChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -148,7 +390,7 @@ function DetailsStep({ appId, onNext }: DetailsStepProps) {
         }
       }
 
-      // Upload new screenshots
+      // Upload new screenshots (optional)
       if (screenshotFiles.length > 0 && currentAppId) {
         setScreenshotUploading(true);
         try {
@@ -167,9 +409,14 @@ function DetailsStep({ appId, onNext }: DetailsStepProps) {
       }
 
       toast.success("App details saved!");
-      onNext(currentAppId!);
+      onNext(currentAppId!, pendingScreens);
     } catch (err) {
-      toast.error("Failed to save. Please try again.");
+      const msg = err instanceof Error ? err.message : String(err);
+      if (msg.includes("No actor")) {
+        toast.error("Still connecting, please wait a moment and try again.");
+      } else {
+        toast.error("Failed to save. Please try again.");
+      }
       console.error(err);
     } finally {
       setIsSubmitting(false);
@@ -200,11 +447,23 @@ function DetailsStep({ appId, onNext }: DetailsStepProps) {
           App Details
         </h2>
         <p className="text-muted-foreground text-sm">
-          Tell us about your app — this will appear on your App Store listing.
+          Tell us about your app — or let AI set it up from your description.
         </p>
       </div>
 
       <div className="space-y-6">
+        {/* AI Chat Panel */}
+        <AiChatPanel onApply={handleAiApply} />
+
+        {/* Divider */}
+        <div className="flex items-center gap-3">
+          <div className="flex-1 h-px bg-border" />
+          <span className="text-xs text-muted-foreground font-medium px-1">
+            or fill in manually
+          </span>
+          <div className="flex-1 h-px bg-border" />
+        </div>
+
         {/* Icon */}
         <div>
           <Label className="text-sm font-medium mb-3 block">App Icon</Label>
@@ -249,14 +508,30 @@ function DetailsStep({ appId, onNext }: DetailsStepProps) {
           <Label htmlFor="app-name" className="text-sm font-medium mb-2 block">
             App Name <span className="text-destructive">*</span>
           </Label>
-          <Input
-            id="app-name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="e.g. TaskFlow, MyNotes, WeatherPulse"
-            className="h-11 rounded-xl"
-            maxLength={50}
-          />
+          <motion.div
+            animate={
+              aiApplied
+                ? {
+                    scale: [1, 1.01, 1],
+                    borderColor: [
+                      "transparent",
+                      "var(--success)",
+                      "transparent",
+                    ],
+                  }
+                : {}
+            }
+            transition={{ duration: 0.5 }}
+          >
+            <Input
+              id="app-name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="e.g. TaskFlow, MyNotes, WeatherPulse"
+              className="h-11 rounded-xl"
+              maxLength={50}
+            />
+          </motion.div>
           <p className="text-xs text-muted-foreground mt-1">
             {name.length}/50 characters
           </p>
@@ -283,9 +558,16 @@ function DetailsStep({ appId, onNext }: DetailsStepProps) {
           </p>
         </div>
 
-        {/* Screenshots */}
+        {/* Screenshots (optional) */}
         <div>
-          <Label className="text-sm font-medium mb-2 block">Screenshots</Label>
+          <div className="flex items-center gap-2 mb-2">
+            <Label className="text-sm font-medium">
+              Screenshots{" "}
+              <span className="text-muted-foreground font-normal">
+                (optional)
+              </span>
+            </Label>
+          </div>
           <div className="flex items-start gap-3 flex-wrap">
             {screenshotPreviews.map((preview, i) => (
               <div key={preview} className="relative group">
@@ -327,7 +609,7 @@ function DetailsStep({ appId, onNext }: DetailsStepProps) {
             </button>
           </div>
           <p className="text-xs text-muted-foreground mt-2">
-            Add screenshots to showcase your app's screens.
+            AI-generated apps don't need screenshots to publish.
           </p>
         </div>
 
@@ -476,22 +758,22 @@ function PhoneComponent({ component }: { component: AppComponent }) {
 interface DesignerStepProps {
   appId: string;
   onBack: () => void;
+  initialScreens?: SuggestedScreen[];
 }
 
-function DesignerStep({ appId, onBack }: DesignerStepProps) {
+function DesignerStep({ appId, onBack, initialScreens }: DesignerStepProps) {
   const navigate = useNavigate();
   const { data: app, isLoading } = useGetApp(appId);
   const addScreen = useAddScreen();
   const editScreen = useEditScreen();
   const deleteScreen = useDeleteScreen();
   const publishApp = usePublishApp();
-  const unpublishApp = useUnpublishApp();
 
   const [selectedScreenId, setSelectedScreenId] = useState<string | null>(null);
   const [dragIndex, setDragIndex] = useState<number | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
+  const [aiScreensSeeded, setAiScreensSeeded] = useState(false);
 
   // Select first screen on load
   useEffect(() => {
@@ -499,6 +781,37 @@ function DesignerStep({ appId, onBack }: DesignerStepProps) {
       setSelectedScreenId(app.screens[0].id);
     }
   }, [app, selectedScreenId]);
+
+  // Seed AI-suggested screens on first load if app has no screens yet
+  useEffect(() => {
+    if (
+      !aiScreensSeeded &&
+      app &&
+      app.screens.length === 0 &&
+      initialScreens &&
+      initialScreens.length > 0
+    ) {
+      setAiScreensSeeded(true);
+      (async () => {
+        let firstId: string | null = null;
+        for (const screen of initialScreens) {
+          const screenId = crypto.randomUUID();
+          if (!firstId) firstId = screenId;
+          try {
+            await addScreen.mutateAsync({
+              appId,
+              screenId,
+              title: screen.title,
+              content: JSON.stringify(screen.components),
+            });
+          } catch {
+            // continue seeding remaining screens
+          }
+        }
+        if (firstId) setSelectedScreenId(firstId);
+      })();
+    }
+  }, [app, aiScreensSeeded, initialScreens, appId, addScreen]);
 
   const selectedScreen = app?.screens.find((s) => s.id === selectedScreenId);
   const selectedComponents = selectedScreen
@@ -641,16 +954,8 @@ function DesignerStep({ appId, onBack }: DesignerStepProps) {
   };
 
   const handleSaveDraft = async () => {
-    setIsSaving(true);
-    try {
-      await unpublishApp.mutateAsync(appId);
-      toast.success("Saved as draft");
-      navigate({ to: "/" });
-    } catch {
-      toast.error("Failed to save");
-    } finally {
-      setIsSaving(false);
-    }
+    toast.success("Draft saved");
+    navigate({ to: "/" });
   };
 
   if (isLoading) {
@@ -701,13 +1006,8 @@ function DesignerStep({ appId, onBack }: DesignerStepProps) {
             size="sm"
             className="gap-1.5 rounded-lg"
             onClick={handleSaveDraft}
-            disabled={isSaving}
           >
-            {isSaving ? (
-              <Loader2 className="w-3.5 h-3.5 animate-spin" />
-            ) : (
-              <BookMarked className="w-3.5 h-3.5" />
-            )}
+            <BookMarked className="w-3.5 h-3.5" />
             Save Draft
           </Button>
           <Button
@@ -725,6 +1025,22 @@ function DesignerStep({ appId, onBack }: DesignerStepProps) {
           </Button>
         </div>
       </div>
+
+      {/* AI screens seeding indicator */}
+      <AnimatePresence>
+        {addScreen.isPending && initialScreens && initialScreens.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            className="mb-4 flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-primary/8 border border-primary/20 text-sm text-primary"
+          >
+            <Sparkles className="w-4 h-4 flex-shrink-0" />
+            <span>AI is building your screens…</span>
+            <Loader2 className="w-3.5 h-3.5 animate-spin ml-auto" />
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <div className="flex gap-4 h-[580px]">
         {/* Left: Screen list */}
@@ -941,9 +1257,13 @@ export function BuilderPage() {
   const [currentAppId, setCurrentAppId] = useState<string | null>(
     appId ?? null,
   );
+  const [aiSuggestedScreens, setAiSuggestedScreens] = useState<
+    SuggestedScreen[]
+  >([]);
 
-  const handleDetailsNext = (id: string) => {
+  const handleDetailsNext = (id: string, screens: SuggestedScreen[]) => {
     setCurrentAppId(id);
+    setAiSuggestedScreens(screens);
     setStep(2);
   };
 
@@ -1005,6 +1325,7 @@ export function BuilderPage() {
               key="designer"
               appId={currentAppId!}
               onBack={() => setStep(1)}
+              initialScreens={aiSuggestedScreens}
             />
           )}
         </AnimatePresence>
