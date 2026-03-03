@@ -100,6 +100,97 @@ export function HomePage() {
         </div>
       </section>
 
+      {/* Marvel Game Featured Banner */}
+      <section className="max-w-5xl mx-auto px-6 pb-8">
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.05, ease: "easeOut" }}
+          className="relative overflow-hidden rounded-3xl cursor-pointer group"
+          style={{
+            background:
+              "linear-gradient(135deg, #1a0a0a 0%, #2d0808 40%, #1a0a18 70%, #0d0d1a 100%)",
+            boxShadow:
+              "0 4px 32px rgba(185, 28, 28, 0.25), 0 0 0 1px rgba(185, 28, 28, 0.15)",
+          }}
+          onClick={() => navigate({ to: "/marvel" })}
+          data-ocid="marvel.button"
+        >
+          {/* Atmospheric glow */}
+          <div
+            className="absolute inset-0 opacity-30"
+            style={{
+              background:
+                "radial-gradient(ellipse at 20% 50%, rgba(239, 68, 68, 0.4) 0%, transparent 60%), radial-gradient(ellipse at 80% 50%, rgba(234, 179, 8, 0.3) 0%, transparent 60%)",
+            }}
+          />
+
+          <div className="relative flex items-center gap-6 px-8 py-6">
+            <div className="text-5xl sm:text-6xl flex-shrink-0 drop-shadow-lg">
+              👺
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-1">
+                <span
+                  className="text-xs font-bold uppercase tracking-widest"
+                  style={{ color: "#ef4444" }}
+                >
+                  Marvel Battle Game
+                </span>
+                <span
+                  className="text-xs px-2 py-0.5 rounded-full font-semibold"
+                  style={{
+                    background: "rgba(239,68,68,0.2)",
+                    color: "#fca5a5",
+                  }}
+                >
+                  New
+                </span>
+              </div>
+              <h3
+                className="font-display text-xl sm:text-2xl font-bold mb-1"
+                style={{ color: "#fef2f2" }}
+              >
+                Defeat the Green Goblin
+              </h3>
+              <p
+                className="text-sm leading-relaxed"
+                style={{ color: "rgba(254,226,226,0.6)" }}
+              >
+                Choose your Marvel hero, customize their costume & powers, then
+                battle in turn-based combat.
+              </p>
+            </div>
+            <div className="flex-shrink-0 hidden sm:flex items-center gap-2">
+              <div className="flex -space-x-1 text-2xl">
+                <span>🕷️</span>
+                <span>🦾</span>
+                <span>🛡️</span>
+                <span>⚡</span>
+                <span>🐾</span>
+              </div>
+            </div>
+            <Button
+              size="sm"
+              className="flex-shrink-0 rounded-2xl px-5 h-9 font-semibold gap-2 group-hover:scale-105 transition-transform"
+              style={{
+                background: "linear-gradient(135deg, #dc2626, #b91c1c)",
+                color: "white",
+                boxShadow: "0 2px 12px rgba(185,28,28,0.5)",
+              }}
+              onClick={(e) => {
+                e.stopPropagation();
+                navigate({ to: "/marvel" });
+              }}
+              data-ocid="marvel.primary_button"
+            >
+              <Play className="w-3.5 h-3.5" />
+              Play Now
+            </Button>
+          </div>
+        </motion.div>
+      </section>
+
       {/* Feature blurbs */}
       <section className="max-w-5xl mx-auto px-6 pb-16">
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">

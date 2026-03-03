@@ -372,7 +372,6 @@ function DetailsStep({ appId, onNext }: DetailsStepProps) {
       // Create or reuse app
       if (!currentAppId) {
         const app = await createApp.mutateAsync({
-          id: crypto.randomUUID(),
           name: name.trim(),
           description: description.trim(),
         });

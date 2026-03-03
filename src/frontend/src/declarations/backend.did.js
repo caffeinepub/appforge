@@ -35,6 +35,7 @@ export const App = IDL.Record({
   'id' : IDL.Text,
   'isPublished' : IDL.Bool,
   'screens' : IDL.Vec(AppScreen),
+  'owner' : IDL.Principal,
   'icon' : IDL.Opt(ExternalBlob),
   'name' : IDL.Text,
   'description' : IDL.Text,
@@ -44,8 +45,12 @@ export const AddScreenshotInput = IDL.Record({
   'appId' : IDL.Text,
   'screenshot' : ExternalBlob,
 });
+export const UserRole = IDL.Variant({
+  'admin' : IDL.Null,
+  'user' : IDL.Null,
+  'guest' : IDL.Null,
+});
 export const CreateAppInput = IDL.Record({
-  'id' : IDL.Text,
   'name' : IDL.Text,
   'description' : IDL.Text,
 });
@@ -55,6 +60,7 @@ export const EditScreenInput = IDL.Record({
   'appId' : IDL.Text,
   'screenId' : IDL.Text,
 });
+export const UserProfile = IDL.Record({ 'name' : IDL.Text });
 export const UploadIconInput = IDL.Record({
   'appId' : IDL.Text,
   'icon' : ExternalBlob,
@@ -87,15 +93,27 @@ export const idlService = IDL.Service({
       [],
     ),
   '_caffeineStorageUpdateGatewayPrincipals' : IDL.Func([], [], []),
+  '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
   'addScreen' : IDL.Func([AddScreenInput], [App], []),
   'addScreenshot' : IDL.Func([AddScreenshotInput], [App], []),
+  'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
   'createApp' : IDL.Func([CreateAppInput], [App], []),
+  'deleteApp' : IDL.Func([IDL.Text], [], []),
   'deleteScreen' : IDL.Func([IDL.Text, IDL.Text], [App], []),
   'editScreen' : IDL.Func([EditScreenInput], [App], []),
   'getApp' : IDL.Func([IDL.Text], [App], ['query']),
-  'listAllApps' : IDL.Func([], [IDL.Vec(App)], ['query']),
+  'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
+  'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
+  'getUserProfile' : IDL.Func(
+      [IDL.Principal],
+      [IDL.Opt(UserProfile)],
+      ['query'],
+    ),
+  'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
+  'listMyApps' : IDL.Func([], [IDL.Vec(App)], ['query']),
   'listPublishedApps' : IDL.Func([], [IDL.Vec(App)], ['query']),
   'publishApp' : IDL.Func([IDL.Text], [App], []),
+  'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
   'unpublishApp' : IDL.Func([IDL.Text], [App], []),
   'uploadIcon' : IDL.Func([UploadIconInput], [App], []),
 });
@@ -130,6 +148,7 @@ export const idlFactory = ({ IDL }) => {
     'id' : IDL.Text,
     'isPublished' : IDL.Bool,
     'screens' : IDL.Vec(AppScreen),
+    'owner' : IDL.Principal,
     'icon' : IDL.Opt(ExternalBlob),
     'name' : IDL.Text,
     'description' : IDL.Text,
@@ -139,8 +158,12 @@ export const idlFactory = ({ IDL }) => {
     'appId' : IDL.Text,
     'screenshot' : ExternalBlob,
   });
+  const UserRole = IDL.Variant({
+    'admin' : IDL.Null,
+    'user' : IDL.Null,
+    'guest' : IDL.Null,
+  });
   const CreateAppInput = IDL.Record({
-    'id' : IDL.Text,
     'name' : IDL.Text,
     'description' : IDL.Text,
   });
@@ -150,6 +173,7 @@ export const idlFactory = ({ IDL }) => {
     'appId' : IDL.Text,
     'screenId' : IDL.Text,
   });
+  const UserProfile = IDL.Record({ 'name' : IDL.Text });
   const UploadIconInput = IDL.Record({
     'appId' : IDL.Text,
     'icon' : ExternalBlob,
@@ -182,15 +206,27 @@ export const idlFactory = ({ IDL }) => {
         [],
       ),
     '_caffeineStorageUpdateGatewayPrincipals' : IDL.Func([], [], []),
+    '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
     'addScreen' : IDL.Func([AddScreenInput], [App], []),
     'addScreenshot' : IDL.Func([AddScreenshotInput], [App], []),
+    'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
     'createApp' : IDL.Func([CreateAppInput], [App], []),
+    'deleteApp' : IDL.Func([IDL.Text], [], []),
     'deleteScreen' : IDL.Func([IDL.Text, IDL.Text], [App], []),
     'editScreen' : IDL.Func([EditScreenInput], [App], []),
     'getApp' : IDL.Func([IDL.Text], [App], ['query']),
-    'listAllApps' : IDL.Func([], [IDL.Vec(App)], ['query']),
+    'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
+    'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
+    'getUserProfile' : IDL.Func(
+        [IDL.Principal],
+        [IDL.Opt(UserProfile)],
+        ['query'],
+      ),
+    'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
+    'listMyApps' : IDL.Func([], [IDL.Vec(App)], ['query']),
     'listPublishedApps' : IDL.Func([], [IDL.Vec(App)], ['query']),
     'publishApp' : IDL.Func([IDL.Text], [App], []),
+    'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
     'unpublishApp' : IDL.Func([IDL.Text], [App], []),
     'uploadIcon' : IDL.Func([UploadIconInput], [App], []),
   });

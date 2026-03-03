@@ -33,13 +33,13 @@ export function useListPublishedApps() {
   });
 }
 
-export function useListAllApps() {
+export function useListMyApps() {
   const { actor, isFetching } = useActor();
   return useQuery<App[]>({
     queryKey: queryKeys.apps,
     queryFn: async () => {
       if (!actor) return [];
-      return actor.listAllApps();
+      return actor.listMyApps();
     },
     enabled: !!actor && !isFetching,
   });
@@ -175,6 +175,20 @@ export function useUnpublishApp() {
     },
     onSuccess: (data) => {
       queryClient.setQueryData(queryKeys.app(data.id), data);
+      queryClient.invalidateQueries({ queryKey: queryKeys.apps });
+    },
+  });
+}
+
+export function useDeleteApp() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+  return useMutation<void, Error, string>({
+    mutationFn: async (appId) => {
+      if (!actor) throw new Error("No actor");
+      return actor.deleteApp(appId);
+    },
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.apps });
     },
   });

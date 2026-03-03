@@ -1,51 +1,41 @@
-# AppForge
+# AppStore
 
 ## Current State
+A no-code app builder platform called "AppForge" where users can:
+- Create apps with name, description, icon, optional screenshots using an AI chat assistant
+- Design multi-screen apps with drag-and-drop components (buttons, text, inputs, lists)
+- Publish apps to a public App Store listing
+- Play/interact with apps through a phone-frame UI
+- Edit and delete apps after publishing
 
-- Full-stack app builder with Motoko backend and React frontend
-- Two-step builder flow: (1) App Details (name, description, icon, screenshots), (2) Screen Designer
-- App Details step requires users to manually upload screenshots
-- Screen Designer lets users add/arrange UI components (button, text, input, list) across multiple screens
-- Published apps appear in an App Store gallery (HomePage)
-- Apps can be previewed and played (PlayPage, AppDetailPage)
-- Backend stores apps with `id, name, description, screens, icon, screenshots, isPublished`
+Backend: Motoko with blob-storage for icons/screenshots. No authentication.
+Frontend: React + TanStack Router with pages: HomePage, BuilderPage, AppDetailPage, PlayPage.
 
 ## Requested Changes (Diff)
 
 ### Add
-- **AI Chat Assistant** panel on the App Details step (Step 1): a floating chat box where users can describe their app in natural language
-- **AI-generated app details**: when user sends a message, the AI (simulated client-side) parses it and auto-fills name, description, and generates placeholder screens for the designer step
-- **AI-generated screens**: when the AI processes the description, it creates initial screens with appropriate components (buttons, lists, inputs, text) based on keywords in the description
-- Optional screenshots: screenshots section stays but is no longer required -- remove the screenshot requirement from the validation logic
+- **Authorization**: Full sign-in/sign-out using Internet Identity. ALL pages require login (no anonymous access to app builder, store, or play page).
+- **Marvel Battle Game**: A dedicated `/marvel` route with a complete Marvel vs Green Goblin battle game:
+  - Hero selection: Spider-Man, Iron Man, Captain America, Thor, Black Panther
+  - Hero costume customization: choose color theme per hero (e.g. classic, gold, stealth, dark)
+  - Special ability selection per hero (e.g. Web Shoot, Repulsor Blast, Shield Throw, Lightning Strike, Vibranium Slash)
+  - Turn-based combat against Green Goblin with HP bars, attack animations, win/lose states
+  - Accessible from the main navigation and from the App Store home page
+- **Rename brand**: All "AppForge" references in UI renamed to "AppStore"
+- **Navigation**: Add "Marvel Game" link in nav bar
 
 ### Modify
-- **DetailsStep validation**: screenshots are now optional (remove any "must have screenshot" requirement -- currently there is none but make it clear in UI that they're optional)
-- **DetailsStep UI**: add an "Ask AI" chat panel alongside the form. When the user types a description and sends it, the AI fills in the name, description fields and optionally suggests screens. The chat should feel conversational with a simple message history.
-- **DetailsStep screenshot label**: change "Screenshots" label to "Screenshots (optional)" to make it clear they're not required
-- **Builder flow**: after AI fills details, the user can proceed to the Screen Designer where AI-generated screens are already populated
+- **Layout/Nav**: Rename "AppForge" → "AppStore" throughout, add sign-in/out button and Marvel Game nav link
+- **All pages**: Gate behind auth — show a login prompt/page if not authenticated
+- **App ownership**: Apps created by a user are tied to their principal (owner field). Only the owner can edit/delete their app.
 
 ### Remove
-- Nothing removed -- manual entry and screenshot upload remain available alongside AI
+- Nothing removed, all existing functionality preserved
 
 ## Implementation Plan
-
-1. **Add AI chat component to DetailsStep** (`BuilderPage.tsx`)
-   - Add a collapsible "Ask AI" section/panel below or alongside the form
-   - Chat input + message history (user messages + AI responses)
-   - AI response is generated client-side using keyword parsing (no external API -- simulate AI by parsing description keywords)
-   - When AI responds, it calls setter functions to auto-fill `name`, `description` fields
-   - AI also returns suggested screens (array of `{title, components[]}`)
-   - Store AI-suggested screens in component state to be passed to DesignerStep
-
-2. **Pass AI-generated screens to DesignerStep**
-   - Add `initialScreens?: Array<{title: string, components: AppComponent[]}>` prop to DesignerStep
-   - On mount, if `initialScreens` is provided and app has no screens yet, create them via `addScreen` mutations
-
-3. **Make screenshots clearly optional**
-   - Update label to "Screenshots (optional)"
-   - No validation change needed (already optional), just clarify in UI
-
-4. **AI parsing logic** (client-side, no external API)
-   - Parse user input for keywords to suggest app name, description, and screen structure
-   - Example: "todo app" -> name: "TaskMaster", description: "...", screens: [Home with list+button, Add Task with input+button]
-   - Keep it simple and fast -- pure JS string parsing with template-based responses
+1. Add `authorization` component (Internet Identity sign-in)
+2. Regenerate Motoko backend to add `owner` field to `App`, filter `listMyApps`, and add ownership checks on mutations
+3. Update frontend Layout to show sign-in/out button and Marvel Game nav link, rename AppForge → AppStore everywhere
+4. Add auth gate (redirect to login if not authenticated) wrapping all routes
+5. Build `/marvel` page: hero picker, costume color chooser, ability picker, turn-based battle against Green Goblin with HP bars and animations
+6. Wire authorization component into frontend

@@ -26,7 +26,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { AppIcon } from "../components/AppIcon";
-import { useGetApp, useUnpublishApp } from "../hooks/useQueries";
+import { useDeleteApp, useGetApp } from "../hooks/useQueries";
 import { parseScreenContent } from "../types/builder";
 import type { AppComponent } from "../types/builder";
 
@@ -183,7 +183,7 @@ export function AppDetailPage() {
   const { appId } = useParams({ from: "/app/$appId" });
   const navigate = useNavigate();
   const { data: app, isLoading, isError } = useGetApp(appId);
-  const unpublishApp = useUnpublishApp();
+  const deleteApp = useDeleteApp();
 
   const [selectedScreenIndex, setSelectedScreenIndex] = useState(0);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -198,8 +198,8 @@ export function AppDetailPage() {
   const handleDelete = async () => {
     setIsDeleting(true);
     try {
-      await unpublishApp.mutateAsync(appId);
-      toast.success("App removed from the store");
+      await deleteApp.mutateAsync(appId);
+      toast.success("App deleted successfully");
       navigate({ to: "/" });
     } catch {
       toast.error("Failed to delete app");

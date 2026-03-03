@@ -24,6 +24,7 @@ export interface App {
   'id' : string,
   'isPublished' : boolean,
   'screens' : Array<AppScreen>,
+  'owner' : Principal,
   'icon' : [] | [ExternalBlob],
   'name' : string,
   'description' : string,
@@ -34,11 +35,7 @@ export interface AppScreen {
   'title' : string,
   'content' : string,
 }
-export interface CreateAppInput {
-  'id' : string,
-  'name' : string,
-  'description' : string,
-}
+export interface CreateAppInput { 'name' : string, 'description' : string }
 export interface EditScreenInput {
   'title' : string,
   'content' : string,
@@ -47,6 +44,10 @@ export interface EditScreenInput {
 }
 export type ExternalBlob = Uint8Array;
 export interface UploadIconInput { 'appId' : string, 'icon' : ExternalBlob }
+export interface UserProfile { 'name' : string }
+export type UserRole = { 'admin' : null } |
+  { 'user' : null } |
+  { 'guest' : null };
 export interface _CaffeineStorageCreateCertificateResult {
   'method' : string,
   'blob_hash' : string,
@@ -74,15 +75,23 @@ export interface _SERVICE {
     _CaffeineStorageRefillResult
   >,
   '_caffeineStorageUpdateGatewayPrincipals' : ActorMethod<[], undefined>,
+  '_initializeAccessControlWithSecret' : ActorMethod<[string], undefined>,
   'addScreen' : ActorMethod<[AddScreenInput], App>,
   'addScreenshot' : ActorMethod<[AddScreenshotInput], App>,
+  'assignCallerUserRole' : ActorMethod<[Principal, UserRole], undefined>,
   'createApp' : ActorMethod<[CreateAppInput], App>,
+  'deleteApp' : ActorMethod<[string], undefined>,
   'deleteScreen' : ActorMethod<[string, string], App>,
   'editScreen' : ActorMethod<[EditScreenInput], App>,
   'getApp' : ActorMethod<[string], App>,
-  'listAllApps' : ActorMethod<[], Array<App>>,
+  'getCallerUserProfile' : ActorMethod<[], [] | [UserProfile]>,
+  'getCallerUserRole' : ActorMethod<[], UserRole>,
+  'getUserProfile' : ActorMethod<[Principal], [] | [UserProfile]>,
+  'isCallerAdmin' : ActorMethod<[], boolean>,
+  'listMyApps' : ActorMethod<[], Array<App>>,
   'listPublishedApps' : ActorMethod<[], Array<App>>,
   'publishApp' : ActorMethod<[string], App>,
+  'saveCallerUserProfile' : ActorMethod<[UserProfile], undefined>,
   'unpublishApp' : ActorMethod<[string], App>,
   'uploadIcon' : ActorMethod<[UploadIconInput], App>,
 }
