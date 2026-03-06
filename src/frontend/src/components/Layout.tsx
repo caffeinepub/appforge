@@ -22,7 +22,7 @@ export function Layout({ children }: LayoutProps) {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       {/* Header */}
-      <header className="sticky top-0 z-20 bg-background/80 backdrop-blur-xl border-b border-border">
+      <header className="sticky top-0 z-20 bg-background/70 backdrop-blur-xl border-b border-border/60 shadow-[0_1px_0_oklch(0.22_0.015_260)]">
         <div className="max-w-5xl mx-auto px-6 h-14 flex items-center justify-between gap-3">
           <Link
             to="/"
@@ -32,7 +32,7 @@ export function Layout({ children }: LayoutProps) {
             <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-sm">
               <AppWindow className="w-4 h-4 text-primary-foreground" />
             </div>
-            <span className="font-display text-xl font-bold text-foreground tracking-tight">
+            <span className="font-display text-xl font-bold text-white tracking-tight">
               AppStore
             </span>
           </Link>
@@ -109,7 +109,7 @@ export function Layout({ children }: LayoutProps) {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-border bg-card/50">
+      <footer className="border-t border-border/50 bg-card/30 backdrop-blur-sm">
         <div className="max-w-5xl mx-auto px-6 py-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-sm text-muted-foreground">
           <div className="flex items-center gap-2">
             <div className="w-5 h-5 rounded-lg bg-gradient-to-br from-primary/30 to-primary/10 flex items-center justify-center">

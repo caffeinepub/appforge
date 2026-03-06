@@ -25,31 +25,31 @@
 
 @layer base {
   :root {
-    /* AppForge: Clean, Apple-inspired light theme */
-    /* Primary: Cool charcoal */
-    /* Accent: Vivid sky blue */
+    /* AppStore: Dark premium theme */
     --radius: 0.75rem;
 
-    --background: 0.985 0.002 250;
-    --foreground: 0.13 0.01 260;
+    /* Dark base */
+    --background: 0.08 0.008 260;
+    --foreground: 0.97 0.005 250;
 
-    --card: 1 0 0;
-    --card-foreground: 0.13 0.01 260;
+    --card: 0.12 0.010 260;
+    --card-foreground: 0.97 0.005 250;
 
-    --popover: 1 0 0;
-    --popover-foreground: 0.13 0.01 260;
+    --popover: 0.12 0.010 260;
+    --popover-foreground: 0.97 0.005 250;
 
-    --primary: 0.55 0.18 255;
-    --primary-foreground: 1 0 0;
+    /* Vivid violet-blue primary */
+    --primary: 0.62 0.22 265;
+    --primary-foreground: 0.97 0 0;
 
-    --secondary: 0.94 0.005 250;
-    --secondary-foreground: 0.13 0.01 260;
+    --secondary: 0.16 0.012 260;
+    --secondary-foreground: 0.97 0.005 250;
 
-    --muted: 0.94 0.005 250;
-    --muted-foreground: 0.52 0.02 255;
+    --muted: 0.16 0.012 260;
+    --muted-foreground: 0.55 0.025 260;
 
-    --accent: 0.55 0.18 255;
-    --accent-foreground: 1 0 0;
+    --accent: 0.62 0.22 265;
+    --accent-foreground: 0.97 0 0;
 
     --destructive: 0.577 0.245 27.325;
     --destructive-foreground: 0.985 0 0;
@@ -57,24 +57,24 @@
     --success: 0.55 0.16 155;
     --success-foreground: 1 0 0;
 
-    --border: 0.88 0.01 250;
-    --input: 0.88 0.01 250;
-    --ring: 0.55 0.18 255;
+    --border: 0.22 0.015 260;
+    --input: 0.22 0.015 260;
+    --ring: 0.62 0.22 265;
 
-    --chart-1: 0.55 0.18 255;
+    --chart-1: 0.62 0.22 265;
     --chart-2: 0.6 0.118 184.704;
     --chart-3: 0.398 0.07 227.392;
     --chart-4: 0.828 0.189 84.429;
     --chart-5: 0.769 0.188 70.08;
 
-    --sidebar: 0.97 0.005 250;
-    --sidebar-foreground: 0.13 0.01 260;
-    --sidebar-primary: 0.55 0.18 255;
-    --sidebar-primary-foreground: 1 0 0;
-    --sidebar-accent: 0.94 0.005 250;
-    --sidebar-accent-foreground: 0.13 0.01 260;
-    --sidebar-border: 0.88 0.01 250;
-    --sidebar-ring: 0.55 0.18 255;
+    --sidebar: 0.10 0.010 260;
+    --sidebar-foreground: 0.97 0.005 250;
+    --sidebar-primary: 0.62 0.22 265;
+    --sidebar-primary-foreground: 0.97 0 0;
+    --sidebar-accent: 0.16 0.012 260;
+    --sidebar-accent-foreground: 0.97 0.005 250;
+    --sidebar-border: 0.22 0.015 260;
+    --sidebar-ring: 0.62 0.22 265;
   }
 
   * {
@@ -86,6 +86,7 @@
     font-family: "Figtree", sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    color-scheme: dark;
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -104,34 +105,36 @@
     font-family: "Figtree", sans-serif;
   }
 
-  /* Glass morphism effect */
+  /* Glass morphism effect — dark */
   .glass {
-    @apply bg-white/80 backdrop-blur-md border border-white/50;
+    @apply bg-black/40 backdrop-blur-md border border-white/10;
   }
 
-  /* App Store card shadow - layered like Apple */
+  /* App Store card shadow — dark-friendly with subtle glow */
   .app-card-shadow {
     box-shadow:
-      0 1px 3px rgba(0, 0, 60, 0.06),
-      0 4px 12px rgba(0, 0, 60, 0.08),
-      0 0 0 1px rgba(0, 0, 60, 0.04);
+      0 1px 3px rgba(0, 0, 0, 0.4),
+      0 4px 16px rgba(0, 0, 0, 0.3),
+      0 0 0 1px rgba(255, 255, 255, 0.05),
+      0 0 24px rgba(98, 72, 230, 0.04);
   }
 
   .app-card-shadow:hover {
     box-shadow:
-      0 2px 8px rgba(0, 0, 60, 0.08),
-      0 12px 30px rgba(0, 0, 60, 0.12),
-      0 0 0 1px rgba(0, 0, 60, 0.06);
+      0 2px 8px rgba(0, 0, 0, 0.5),
+      0 12px 30px rgba(0, 0, 0, 0.35),
+      0 0 0 1px rgba(255, 255, 255, 0.08),
+      0 0 40px rgba(98, 72, 230, 0.12);
     transform: translateY(-2px);
   }
 
-  /* Phone frame */
+  /* Phone frame — dark */
   .phone-frame {
-    background: linear-gradient(145deg, #f5f5f7, #e8e8ed);
+    background: linear-gradient(145deg, #1a1a2e, #16213e);
     box-shadow:
-      0 0 0 1px rgba(0,0,0,0.12),
-      0 4px 20px rgba(0,0,0,0.15),
-      inset 0 0 0 1px rgba(255,255,255,0.4);
+      0 0 0 1px rgba(255,255,255,0.08),
+      0 8px 32px rgba(0,0,0,0.6),
+      inset 0 0 0 1px rgba(255,255,255,0.04);
   }
 
   /* Drag handle */
@@ -153,9 +156,24 @@
 
   /* Gradient text */
   .gradient-text {
-    background: linear-gradient(135deg, oklch(0.55 0.18 255), oklch(0.50 0.22 285));
+    background: linear-gradient(135deg, oklch(0.72 0.22 265), oklch(0.78 0.18 290), oklch(0.70 0.24 245));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+  }
+
+  /* Glow effect for primary elements */
+  .primary-glow {
+    box-shadow: 0 0 40px oklch(0.62 0.22 265 / 0.35), 0 0 80px oklch(0.62 0.22 265 / 0.15);
+  }
+
+  /* Noise texture overlay */
+  .noise-bg::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    opacity: 0.4;
   }
 }

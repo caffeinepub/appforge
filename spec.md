@@ -1,41 +1,37 @@
 # AppStore
 
 ## Current State
-A no-code app builder platform called "AppForge" where users can:
-- Create apps with name, description, icon, optional screenshots using an AI chat assistant
-- Design multi-screen apps with drag-and-drop components (buttons, text, inputs, lists)
-- Publish apps to a public App Store listing
-- Play/interact with apps through a phone-frame UI
-- Edit and delete apps after publishing
-
-Backend: Motoko with blob-storage for icons/screenshots. No authentication.
-Frontend: React + TanStack Router with pages: HomePage, BuilderPage, AppDetailPage, PlayPage.
+- Full-stack app with Motoko backend and React/TypeScript frontend
+- Light Apple-inspired theme (white/gray palette, blue accent)
+- Features: sign-in (Internet Identity), app builder (2-step: details + screen designer), AI chat builder, app store gallery, app detail page, play page, Marvel battle game
+- Homepage has hero section, feature blurbs, Marvel banner, and app store grid
+- Layout.tsx wraps all pages with a nav header
 
 ## Requested Changes (Diff)
 
 ### Add
-- **Authorization**: Full sign-in/sign-out using Internet Identity. ALL pages require login (no anonymous access to app builder, store, or play page).
-- **Marvel Battle Game**: A dedicated `/marvel` route with a complete Marvel vs Green Goblin battle game:
-  - Hero selection: Spider-Man, Iron Man, Captain America, Thor, Black Panther
-  - Hero costume customization: choose color theme per hero (e.g. classic, gold, stealth, dark)
-  - Special ability selection per hero (e.g. Web Shoot, Repulsor Blast, Shield Throw, Lightning Strike, Vibranium Slash)
-  - Turn-based combat against Green Goblin with HP bars, attack animations, win/lose states
-  - Accessible from the main navigation and from the App Store home page
-- **Rename brand**: All "AppForge" references in UI renamed to "AppStore"
-- **Navigation**: Add "Marvel Game" link in nav bar
+- **Dark theme**: Full dark mode color palette across the entire app (dark backgrounds, light text, glowing accents) -- inspired by Caffeine's dark aesthetic
+- **Landing/marketing homepage**: Replace the current homepage with a rich marketing landing page that has:
+  - Hero section with animated tagline, sub-headline, and two CTAs (Create App, Browse Store)
+  - Features section (3 feature cards with icons)
+  - "How it works" 3-step section
+  - Marvel game callout banner (existing)
+  - App store gallery section (existing)
+  - Footer with branding
+- **AI chat builder upgrade**: The existing AI chat panel in BuilderPage is enhanced with better visual styling to match the new dark theme; keep all logic intact
 
 ### Modify
-- **Layout/Nav**: Rename "AppForge" → "AppStore" throughout, add sign-in/out button and Marvel Game nav link
-- **All pages**: Gate behind auth — show a login prompt/page if not authenticated
-- **App ownership**: Apps created by a user are tied to their principal (owner field). Only the owner can edit/delete their app.
+- **index.css**: Replace the light OKLCH color tokens with a dark theme palette. Keep font definitions and utility classes, update color values.
+- **HomePage.tsx**: Rewrite as a full Caffeine-style marketing landing page with hero, features, how-it-works, Marvel banner, and app store grid
+- **Layout.tsx**: Update nav styling to match dark theme (glassmorphism dark nav)
+- **App.tsx (LoginPage)**: Update LoginPage styling to match the new dark theme
 
 ### Remove
-- Nothing removed, all existing functionality preserved
+- Nothing removed from functionality
 
 ## Implementation Plan
-1. Add `authorization` component (Internet Identity sign-in)
-2. Regenerate Motoko backend to add `owner` field to `App`, filter `listMyApps`, and add ownership checks on mutations
-3. Update frontend Layout to show sign-in/out button and Marvel Game nav link, rename AppForge → AppStore everywhere
-4. Add auth gate (redirect to login if not authenticated) wrapping all routes
-5. Build `/marvel` page: hero picker, costume color chooser, ability picker, turn-based battle against Green Goblin with HP bars and animations
-6. Wire authorization component into frontend
+1. Update `index.css` with dark OKLCH color tokens (dark background ~0.08, foreground ~0.97, primary vivid blue/violet)
+2. Rewrite `HomePage.tsx` with full Caffeine-style marketing landing page
+3. Update `Layout.tsx` nav to match dark glassmorphism style
+4. Polish `App.tsx` LoginPage for the dark theme
+5. Run typecheck and build to validate

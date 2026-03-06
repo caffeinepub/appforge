@@ -55,9 +55,31 @@ function LoginPage({
       className="min-h-screen bg-background flex flex-col"
       data-ocid="auth.modal"
     >
-      {/* Subtle background */}
+      {/* Dark atmospheric backgrounds */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-gradient-radial from-primary/8 to-transparent rounded-full blur-3xl" />
+        <div
+          className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[600px]"
+          style={{
+            background:
+              "radial-gradient(ellipse at 50% 20%, oklch(0.62 0.22 265 / 0.18) 0%, transparent 60%)",
+          }}
+        />
+        <div
+          className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[600px] h-[400px]"
+          style={{
+            background:
+              "radial-gradient(ellipse at 50% 80%, oklch(0.78 0.18 290 / 0.08) 0%, transparent 70%)",
+          }}
+        />
+        {/* Grid lines */}
+        <div
+          className="absolute inset-0 opacity-[0.03]"
+          style={{
+            backgroundImage:
+              "linear-gradient(oklch(0.97 0.005 250) 1px, transparent 1px), linear-gradient(90deg, oklch(0.97 0.005 250) 1px, transparent 1px)",
+            backgroundSize: "80px 80px",
+          }}
+        />
       </div>
 
       <div className="flex-1 flex flex-col items-center justify-center px-6 relative z-10">
@@ -74,7 +96,15 @@ function LoginPage({
             transition={{ duration: 0.5, delay: 0.1 }}
             className="flex justify-center mb-8"
           >
-            <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-2xl shadow-primary/25">
+            <div
+              className="w-20 h-20 rounded-3xl flex items-center justify-center"
+              style={{
+                background:
+                  "linear-gradient(135deg, oklch(0.62 0.22 265), oklch(0.55 0.24 285))",
+                boxShadow:
+                  "0 0 0 1px oklch(0.62 0.22 265 / 0.4), 0 8px 32px oklch(0.62 0.22 265 / 0.4)",
+              }}
+            >
               <AppWindow className="w-10 h-10 text-white" />
             </div>
           </motion.div>
@@ -103,20 +133,30 @@ function LoginPage({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5, delay: 0.4 }}
-            className="text-muted-foreground/60 text-sm mb-10"
+            className="text-muted-foreground/50 text-sm mb-10"
           >
             Sign in to create apps, customize Marvel heroes, and publish to the
             store.
           </motion.p>
 
+          {/* Glass card wrapper for the button */}
           <motion.div
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.5 }}
+            className="rounded-2xl p-5 bg-card/50 border border-border/50 backdrop-blur-md"
+            style={{
+              boxShadow:
+                "0 4px 24px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.06)",
+            }}
           >
             <Button
               size="lg"
-              className="w-full h-13 rounded-2xl text-base gap-2.5 shadow-lg shadow-primary/20 font-semibold"
+              className="w-full rounded-xl text-base gap-2.5 font-semibold"
+              style={{
+                height: "52px",
+                boxShadow: "0 4px 20px oklch(0.62 0.22 265 / 0.35)",
+              }}
               onClick={onLogin}
               disabled={isLoggingIn}
               data-ocid="auth.primary_button"
@@ -133,21 +173,15 @@ function LoginPage({
                 </>
               )}
             </Button>
+            <p className="text-xs text-muted-foreground/40 mt-3 text-center">
+              Free forever · No passwords · Powered by Internet Computer
+            </p>
           </motion.div>
-
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.5, delay: 0.7 }}
-            className="text-muted-foreground/50 text-xs mt-6"
-          >
-            Free forever. No passwords. Powered by Internet Computer.
-          </motion.p>
         </motion.div>
       </div>
 
       {/* Footer */}
-      <footer className="py-6 text-center">
+      <footer className="py-6 text-center border-t border-border/30">
         <p className="text-xs text-muted-foreground/40">
           © {new Date().getFullYear()} AppStore · Built with ❤️ using{" "}
           <a

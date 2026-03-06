@@ -652,28 +652,28 @@ const COMPONENT_TYPES = [
     label: "Button",
     icon: Square,
     desc: "Tap action",
-    color: "text-blue-600 bg-blue-50",
+    color: "text-blue-400 bg-blue-950/60",
   },
   {
     type: "text" as const,
     label: "Text Label",
     icon: Type,
     desc: "Display text",
-    color: "text-purple-600 bg-purple-50",
+    color: "text-violet-400 bg-violet-950/60",
   },
   {
     type: "input" as const,
     label: "Input Field",
     icon: AlignLeft,
     desc: "Text entry",
-    color: "text-emerald-600 bg-emerald-50",
+    color: "text-emerald-400 bg-emerald-950/60",
   },
   {
     type: "list" as const,
     label: "List",
     icon: List,
     desc: "Item list",
-    color: "text-orange-600 bg-orange-50",
+    color: "text-orange-400 bg-orange-950/60",
   },
 ];
 

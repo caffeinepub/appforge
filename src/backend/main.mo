@@ -11,10 +11,10 @@ import Storage "blob-storage/Storage";
 import MixinStorage "blob-storage/Mixin";
 import MixinAuthorization "authorization/MixinAuthorization";
 import AccessControl "authorization/access-control";
-import Migration "migration";
+
 
 // Migration from deprecated version.
-(with migration = Migration.run)
+
 actor {
   let accessControlState = AccessControl.initState();
   
